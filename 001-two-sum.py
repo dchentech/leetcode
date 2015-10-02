@@ -11,7 +11,7 @@ Question:
 
 Annotation:
     1. 2 times for loop statements are two slow.
-    2. Always remember that Cache is very important.
+    2. Always remember that Cache is very important. Thanks Google and Stackoverflow help me.
 """
 
 
