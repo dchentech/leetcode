@@ -21,6 +21,7 @@ Question:
 
 Annotation:
     1. Your runtime beats 51.75% of python submissions.
+    2. Optimize: Or use Math operation on the original x.
 """
 
 class Solution(object):
