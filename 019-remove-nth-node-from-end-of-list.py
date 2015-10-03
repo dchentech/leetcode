@@ -16,6 +16,7 @@ Question:
 
 Performance:
     1. Total Accepted: 74515 Total Submissions: 274695 Difficulty: Easy
+    2. Your runtime beats 84.17% of python submissions.
 """
 
 
@@ -25,8 +26,11 @@ class ListNode(object):
         self.val = x
         self.next = None
 
+    def __repr__(self):
+        return "{} -> {}".format(self.val, self.next)
 
-class Solution(object):
+
+class SolutionWithIndex(object):
     def removeNthFromEnd(self, head, n):
         """
         :type head: ListNode
@@ -57,6 +61,45 @@ class Solution(object):
 
         return head
 
+
+class SolutionWithShortLine(object):
+    def removeNthFromEnd(self, head, n):
+        """
+        :type head: ListNode
+        :type n: int
+        :rtype: ListNode
+
+        Algorithm (get the idea from other Github LeetCode Python repos):
+          step1:
+                ---------------------   <- Long Line
+            A B
+          step2:
+                ---------------------
+                A -n- B                 <- Short Line
+          step3:
+                ---------------------
+                              A -n- B   move the short from start to end.
+        """
+        # step1
+        dummy = ListNode(-1)
+        dummy.next = head
+        short_line_left, short_line_right = dummy, dummy  # they are just pointers that moved around the line.
+
+        # step2
+        for idx in xrange(n):
+            short_line_right = short_line_right.next
+
+        # step3
+        while short_line_right.next:  # until reach the end
+            short_line_left, short_line_right = short_line_left.next, short_line_right.next
+        short_line_left.next = short_line_left.next.next  # remove nth node
+
+        return dummy.next  # Always has the next, whatever is ListNode or None
+
+
+Solution = SolutionWithShortLine
+
+
 n1 = ListNode(1)
 n2 = ListNode(2)
 n3 = ListNode(3)
@@ -80,3 +123,9 @@ l2 = ListNode(2)
 l1.next = l2
 result = Solution().removeNthFromEnd(l1, 1)
 assert result is l1, result
+
+o1 = ListNode(1)
+o2 = ListNode(2)
+o1.next = o2
+result = Solution().removeNthFromEnd(o1, 2)
+assert result is o2, result
