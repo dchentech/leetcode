@@ -14,7 +14,7 @@ Performance:
 from datetime import datetime
 
 
-class LRUCache(object):
+class LRUCacheSlow(object):
 
     def __init__(self, capacity):
         """
@@ -77,6 +77,7 @@ class LRUCache(object):
             # select minimal used items in O(N)
             min_count = None
             candidate_keys = []
+            # too SLOW!!!
             for k1, c1 in self.key_get_counters.iteritems():
                 min_count = min_count or c1
                 if c1 < min_count:
@@ -99,9 +100,41 @@ class LRUCache(object):
         self.key_get_counters[key] = 0
 
 
+import collections
+
+class LRUCache:
+    """
+    copied from http://www.kunxi.org/blog/2014/05/lru-cache-in-python/, it's a nice article.
+
+    Performance:
+        Your runtime beats 60.71% of python submissions.
+    """
+
+    def __init__(self, capacity):
+        self.capacity = capacity
+        self.cache = collections.OrderedDict()
+
+    def get(self, key):
+        try:
+            value = self.cache.pop(key)
+            self.cache[key] = value
+            return value
+        except KeyError:
+            return -1
+
+    def set(self, key, value):
+        try:
+            self.cache.pop(key)
+        except KeyError:
+            if len(self.cache) >= self.capacity:
+                self.cache.popitem(last=False)
+        self.cache[key] = value
+
+"""
 lc0 = LRUCache(0)
 lc0.set("hello", 5)
 assert lc0.get("hello") == -1
+"""
 
 lc1 = LRUCache(1)
 assert lc1.get("hello") == -1
