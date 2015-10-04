@@ -102,7 +102,7 @@ class LRUCacheSlow(object):
 
 import collections
 
-class LRUCache:
+class LRUCacheOrderedDict:
     """
     copied from http://www.kunxi.org/blog/2014/05/lru-cache-in-python/, it's a nice article.
 
@@ -129,6 +129,36 @@ class LRUCache:
             if len(self.cache) >= self.capacity:
                 self.cache.popitem(last=False)
         self.cache[key] = value
+
+
+class LRUCache_DontUseList(object):
+    """
+    Demonstration about why don't use list as a recent_visited_list.
+    """
+
+    def __init__(self, capacity):
+        """
+        :type capacity: int
+        """
+        self.not_exist_value = -1
+        self.capacity = capacity
+
+        self.recent_visited_list = list()  # move a element to ends costs too much!
+        self.key_to_idx_in_recent_visited_list = dict()
+
+        self.store = dict()
+
+    def get(self, key):
+        pass
+
+    def set(self, key, value):
+        self.store[key] = value
+
+        if key in self.key_to_idx_in_recent_visited_list:
+            self.key_to_idx_in_recent_visited_list[key]
+
+
+LRUCache = LRUCacheOrderedDict
 
 """
 lc0 = LRUCache(0)
