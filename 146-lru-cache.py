@@ -11,7 +11,7 @@ Performance:
     1. Total Accepted: 50349 Total Submissions: 328138 Difficulty: Hard
 """
 
-from collections import defaultdict
+from datetime import datetime
 
 
 class LRUCache(object):
@@ -19,22 +19,29 @@ class LRUCache(object):
     def __init__(self, capacity):
         """
         :type capacity: int
+
+        LRUCache's main requriement is to operate `get` much more than `set`, so `get` operate should costs much less than `set`.
         """
+        self.not_exist_value = -1
         self.capacity = capacity
-        self.lru_list = []  # sorted by high -> low. always sorted when get or set
-        self.key_get_counter = defaultdict(int)
-        self.key_to_lru_list_idxes = dict()
         self.enable_lru = self.capacity > 0
 
+        self.key_get_counters = dict()
+        # time is only about operate *sequence*
+        self.key_to_touched_time = dict()
+
         self.store = dict()  # just a simple cache store
+
+    def __repr__(self):
+        return "<LRUCache#{} visited status {}, key-value {}>".format(self.capacity, self.key_get_counters, self.store)
 
     def get(self, key):
         """
         :rtype: int
         """
-        val = self.store.get(key, -1)
-        if val == -1:
-            return -1
+        val = self.store.get(key, self.not_exist_value)
+        if val == self.not_exist_value:
+            return self.not_exist_value
         else:
             self.get_lru(key)
             return val
@@ -45,56 +52,51 @@ class LRUCache(object):
         :type value: int
         :rtype: nothing
         """
-        orig_val = self.store.get(key, -1)
-        if orig_val == -1:  # then it's a new insert
-            self.set_lru(key, value)
-        else:
-            pass  # do nothing
+        self.set_lru(key, value)
 
     def get_lru(self, key):
         if not self.enable_lru:
             return False
 
-        # keep lru list sorted
-        self.key_get_counter[key] += 1
-        orig_idx = self.key_to_lru_list_idxes[key]
-        if orig_idx > 0:  # if equals to zero, then skip this step
-            higher_key = self.lru_list[orig_idx - 1]
-            higher_key_count = self.key_get_counter[higher_key]
-            if higher_key_count >= self.key_get_counter[key]:  # then switch both
-                self.lru_list[orig_idx - 1] = key
-                self.lru_list[orig_idx] = higher_key
-                self.key_to_lru_list_idxes[key] = orig_idx - 1
-                self.key_to_lru_list_idxes[higher_key] = orig_idx
+        self.key_get_counters[key] += 1
+        self.key_to_touched_time[key] = datetime.now()
 
     def set_lru(self, key, value):
         if not self.enable_lru:
             return False
 
-        # 1. set it!
-        self.store[key] = value
+        # 0. get current LRU cache status
+        curr_size = len(self.store)
 
-        # 2. keep the LRU Cache
-        insert_idx = len(self.lru_list) - 1
-        # if insert_idx == -1:  # the first insert into the list
-        #    insert_idx = 0
-        # Python can't set the idx with value in a list, when the idx not in current list
-        use_append = True
-        if len(self.lru_list) == self.capacity:  # it's full
-            use_append = False
-
-            # remove the (previous) last element information
-            to_remove_key = self.lru_list[insert_idx]
-            del self.key_get_counter[to_remove_key]
-            del self.key_to_lru_list_idxes[to_remove_key]
-            del self.store[to_remove_key]
-
-        # replace the last element with current key
-        if use_append:
-            self.lru_list.append(key)
+        # 1. keep the LRU Cache
+        if curr_size < self.capacity:
+            pass  # do nothing
         else:
-            self.lru_list[insert_idx] = key
-        self.key_to_lru_list_idxes[key] = insert_idx
+            # need to remove least used item.
+            # TODO improve fetch minimal counter performance.
+            # select minimal used items in O(N)
+            min_count = None
+            candidate_keys = []
+            for k1, c1 in self.key_get_counters.iteritems():
+                min_count = min_count or c1
+                if c1 < min_count:
+                    min_count = c1
+                    candidate_keys = [k1]
+                else:
+                    candidate_keys.append(k1)
+            # remove oldest one.
+            to_remove_key = sorted(candidate_keys,
+                                   key=lambda k1: self.key_to_touched_time[k1])[0]
+
+            # print "LRUCache#{} => remove key:".format(self.capacity), to_remove_key
+            del self.store[to_remove_key]
+            del self.key_get_counters[to_remove_key]
+            del self.key_to_touched_time[to_remove_key]
+
+        # 2. set it!
+        self.store[key] = value
+        self.key_to_touched_time[key] = datetime.now()
+        self.key_get_counters[key] = 0
 
 
 lc0 = LRUCache(0)
@@ -108,10 +110,45 @@ assert lc1.get("hello") == 5
 lc1.set("world", 5)
 assert lc1.get("hello") == -1
 
-lc2 = LRUCache(3)
-lc2.set("hello", 5)
-lc1.set("world", 5)
-lc1.set("python", 6)
-lc1.set("leetcode", 8)
-assert lc1.get("hello") == -1
-# TODO re-insert
+lc3 = LRUCache(3)
+lc3.set("hello", 5)
+lc3.set("world", 5)
+lc3.set("python", 6)
+lc3.set("leetcode", 8)
+assert lc3.get("hello") == -1
+lc3.set("hello", 5)  # re-insert
+assert lc3.get("world") == -1
+# current `get` status: hello:0, python:0, leetcode:0
+lc3.get("python")
+lc3.get("leetcode")
+lc3.set("rocks", 5)
+# print lc3
+assert lc3.get("hello") == -1
+
+
+# testcase from leetcode testcase
+#    2,[set(2,1),set(2,2),get(2),set(1,1),set(4,1),get(2)]
+#    [2,-1]
+lc2 = LRUCache(2)
+lc2.set(2, 1)
+print lc2
+
+lc2.set(2, 2)
+print lc2
+assert lc2.get(2) == 2
+lc2.set(1, 1)
+lc2.set(4, 1)
+assert lc2.get(2) == -1
+
+
+"""
+-->  LeetCode online judge result <--
+Input:
+    2,[set(2,1),set(2,2),get(2),set(1,1),set(4,1),get(2)]
+
+Output:
+    [1,-1]
+
+Expected:
+    [2,-1]  # => all `get` value
+"""
