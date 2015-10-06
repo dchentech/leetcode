@@ -33,7 +33,7 @@ class Solution(object):
         :rtype: str
         """
         num_to_alpha = {idx - 64: chr(idx) for idx in range(ord('A'), ord('Z') + 1)}
-        alpha_size = len(num_to_alpha)
+        alpha_size = len(num_to_alpha)  # 26
 
         digits = []
         while n > 0:
