@@ -6,6 +6,7 @@ Question:
 
 Performance:
     1. Total Accepted: 28832 Total Submissions: 107900 Difficulty: Easy
+    2. Your runtime beats 25.98% of python submissions.
 """
 
 from collections import defaultdict
