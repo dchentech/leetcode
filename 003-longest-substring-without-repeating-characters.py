@@ -7,7 +7,9 @@ Question:
 
 Annotation:
     1. In a O(1) algorithm, just start from the duplicated found element, and don't start with the window begin next element, cause it's already the longest substring without repeating characters until now.
-    2. performance, "Your runtime beats 37.55% of python submissions."
+
+Performance:
+    1. Your runtime beats 43.67% of python submissions.
 """
 
 

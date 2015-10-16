@@ -13,8 +13,6 @@ Question:
 
 Performance:
     1. Total Accepted: 59004 Total Submissions: 272050 Difficulty: Easy
-    2.
-
 """
 
 
