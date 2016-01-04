@@ -20,10 +20,11 @@ Note:
 
 Performance:
     1. Total Accepted: 12780 Total Submissions: 53592 Difficulty: Easy
+    2. Your runtime beats 34.71% of python submissions.
 """
 
 
-class NumArray(object):
+class NumArray_TimeLimitExceeded(object):
     def __init__(self, nums):
         """
         initialize your data structure here.
@@ -56,6 +57,29 @@ class NumArray(object):
             curr_idx += 1
 
         return curr_sum
+
+
+class NumArray(object):
+    """
+    Thanks Python version in https://leetcode.com/discuss/68725/5-lines-c-4-lines-python
+    """
+    def __init__(self, nums):
+        """
+        initialize your data structure here.
+        :type nums: List[int]
+        """
+        self.accumulate = [0]
+        for n in nums:
+            self.accumulate += [self.accumulate[-1] + n]
+
+    def sumRange(self, i, j):
+        """
+        sum of elements nums[i..j], inclusive.
+        :type i: int
+        :type j: int
+        :rtype: int
+        """
+        return self.accumulate[j+1] - self.accumulate[i]
 
 
 # Your NumArray object will be instantiated and called as such:
